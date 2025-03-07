@@ -1,0 +1,69 @@
+@import url("https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --color-primary-marine-blue: hsl(213, 96%, 18%);
+  --color-primary-purplish-blue: hsl(243, 100%, 62%);
+  --color-primary-pastel-blue: hsl(228, 100%, 84%);
+  --color-primary-light-blue: hsl(206, 94%, 87%);
+  --color-primary-strawberry-red: hsl(354, 84%, 57%);
+
+  --color-neutral-cool-gray: hsl(231, 11%, 63%);
+  --color-neutral-light-gray: hsl(229, 24%, 87%);
+  --color-neutral-magnolia: hsl(217, 100%, 97%);
+  --color-neutral-alabaster: hsl(231, 100%, 99%);
+  --color-neutral-white: hsl(0, 0%, 100%);
+  --font-body: "Ubuntu", sans-serif;
+}
+
+.steps {
+  @apply w-8 h-8 rounded-full p-4 bg-transparent text-neutral-white border-2 flex justify-center align-middle items-center font-bold;
+}
+
+.form-section {
+  @apply min-h-110 w-full  rounded-lg flex flex-col gap-4 p-8
+  max-w-200 
+  transition ease-in duration-300 shadow-lg shadow-neutral-500;
+}
+
+.selected {
+  @apply bg-primary-light-blue text-primary-marine-blue border-primary-light-blue;
+}
+
+.active {
+  @apply translate-0 absolute top-0 left-0 opacity-100;
+}
+.inactive {
+  @apply translate-x-100 absolute opacity-0 pointer-events-none;
+}
+
+.section-title {
+  @apply text-primary-marine-blue text-2xl font-bold;
+}
+
+.description {
+  @apply text-base text-neutral-cool-gray font-medium pr-8;
+}
+
+.label {
+  @apply text-primary-marine-blue font-medium;
+}
+
+.input {
+  @apply py-2 px-4 border-2 border-neutral-light-gray rounded-md outline-0
+  font-bold text-primary-marine-blue
+  placeholder:font-bold placeholder:text-neutral-cool-gray
+  focus:border-primary-purplish-blue
+  hover:border-primary-purplish-blue;
+}
+
+/* step-2 */
+.category-selector {
+  @apply flex gap-4  justify-baseline align-middle p-4 rounded-lg border-2 border-neutral-300 items-center
+  hover:border-primary-purplish-blue w-full cursor-pointer focus-within:bg-neutral-magnolia focus-within:border-primary-purplish-blue;
+}
+/* step-2 */
+
+* {
+  font-family: var(--font-body);
+}
