@@ -8,9 +8,13 @@ import clsx from "clsx";
 function App() {
   const [activeStep, setActiveStep] = useState(2);
   const [steps, setSteps] = useState([1, 2, 3, 4]);
+  const [switchState, setSwitchState] = useState(false);
 
   function handleNextStep() {
     setActiveStep((s) => s + 1);
+  }
+  function handlePreviusStep() {
+    setActiveStep((s) => s - 1);
   }
 
   function handleSetStep(step) {
@@ -20,6 +24,10 @@ function App() {
   useEffect(() => {
     // console.log(activeStep);
   }, [activeStep]);
+
+  function switchSchalten() {
+    setSwitchState((v) => !v);
+  }
 
   const PlanSelector = ({
     inputId,
@@ -55,17 +63,8 @@ function App() {
           className="w-full h-auto bg-cover bg-no-repeat z-0"
           src={bgMobile}
         />
-        <div className="bg-neutral-white p-4 flex justify-end">
-          <button
-            onClick={handleNextStep}
-            className="bg-primary-marine-blue text-neutral-alabaster py-3 px-5 rounded-md "
-            type="button"
-          >
-            Next Step
-          </button>
-        </div>
       </div>
-      <div className="z-9 relative p-4 h-full w-full overflow-hidden">
+      <div className="z-9 relative h-full w-full overflow-hidde flex flex-col overflow-hidden justify-between">
         <div className="w-full flex justify-center gap-4 py-12">
           {steps.map((step, index) => {
             return (
@@ -79,7 +78,7 @@ function App() {
             );
           })}
         </div>
-        <form action="#" className="relative h-full">
+        <form action="#" className="relative h-full m-4">
           <div
             className={clsx(
               "form-section bg-neutral-white",
@@ -159,10 +158,44 @@ function App() {
                 icon={proIcon}
               />
 
-              <div>
-                <p>Monthly</p>
-                <input type="radio" name="payment-" id="" />
-                <p>Yearly</p>
+              <div className="flex p-2 w-full justify-center gap-6 bg-neutral-magnolia rounded-md ">
+                <p
+                  className={clsx(
+                    "font-medium transition-all duration-300",
+                    switchState
+                      ? "text-neutral-cool-gray"
+                      : "text-primary-marine-blue"
+                  )}
+                >
+                  Monthly
+                </p>
+                <input
+                  type="radio"
+                  name="payment-frequency"
+                  id="paryment-frequency"
+                  className="absolute hidden peer"
+                />
+                <label
+                  // className=
+                  className={clsx(
+                    "w-14 bg-primary-marine-blue rounded-2xl relative after:w-4 after:h-4 after:bg-neutral-white after:rounded-full after:absolute after:left-1 after:top-1/2 after:-translate-y-1/2 after:transition-all after:duration-300 cursor-pointer",
+                    switchState
+                      ? "peer-checked:after:translate-x-[calc(100%+1rem)]"
+                      : ""
+                  )}
+                  htmlFor="paryment-frequency"
+                  onClick={switchSchalten}
+                ></label>
+                <p
+                  className={clsx(
+                    "font-medium transition-all duration-300",
+                    switchState
+                      ? "text-primary-marine-blue"
+                      : "text-neutral-cool-gray"
+                  )}
+                >
+                  Yearly
+                </p>
               </div>
             </div>
           </div>
@@ -180,6 +213,21 @@ function App() {
             )}
           ></div>
         </form>
+        <div className="bg-neutral-white p-4 flex justify-between">
+          <button
+            onClick={handlePreviusStep}
+            className="text-neutral-cool-gray font-semibold hover:text-primary-marine-blue"
+          >
+            Go Back
+          </button>
+          <button
+            onClick={handleNextStep}
+            className="bg-primary-marine-blue text-neutral-alabaster py-3 px-5 rounded-md ml-auto"
+            type="button"
+          >
+            Next Step
+          </button>
+        </div>
       </div>
     </div>
   );
