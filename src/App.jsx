@@ -2,13 +2,23 @@ import { useState, useEffect } from "react";
 import bgMobile from "./assets/bg-sidebar-mobile.svg";
 import bgDesktop from "./assets/bg-sidebar-desktop.svg";
 import advanceIcon from "./assets/icon-advanced.svg";
+import checkMarkIcon from "./assets/icon-checkmark.svg";
 import arcadeIcon from "./assets/icon-arcade.svg";
 import proIcon from "./assets/icon-pro.svg";
 import clsx from "clsx";
 
 function App() {
-  const [activeStep, setActiveStep] = useState(3);
-  const [switchState, setSwitchState] = useState(false);
+  const [activeStep, setActiveStep] = useState(1);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    selectedPlan: "",
+    paymentPlan: "monthly",
+    online_service: false,
+    larger_storage: false,
+    customizable_profile: false,
+  });
   const steps = [
     {
       id: 1,
@@ -28,6 +38,10 @@ function App() {
     },
   ];
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   function handleNextStep() {
     setActiveStep((s) => s + 1);
   }
@@ -40,37 +54,103 @@ function App() {
   }
 
   useEffect(() => {
-    // console.log(activeStep);
-  }, [activeStep]);
+    console.log(formData);
+  }, [formData]);
 
-  function switchSchalten() {
-    setSwitchState((v) => !v);
+  function handleSelectPaymentPlan() {
+    const newPlan = formData.paymentPlan === "monthly" ? "yearly" : "monthly";
+    setFormData({ ...formData, paymentPlan: newPlan });
+  }
+
+  function handleSelectPlan(id) {
+    setFormData({ ...formData, selectedPlan: id });
+  }
+  function handleSelectAddOns(id) {
+    setFormData({ ...formData, [id]: !formData[id] });
   }
 
   const PlanSelector = ({
     inputId,
     inputName,
     inputPriceMonthly,
-    inputPriceYearly,
+    freeMonths,
     icon,
   }) => {
     return (
-      <label className="category-selector" for={inputId}>
+      <label
+        className={clsx(
+          "category-selector focus-within:bg-neutral-magnolia   focus-within:border-primary-purplish-blue",
+          formData.selectedPlan === inputId
+            ? "border-primary-purplish-blue bg-neutral-magnolia "
+            : ""
+        )}
+        for={inputId}
+      >
         <input
           type="radio"
           className="opacity-0 absolute pointer-events-none"
           name="plan"
           id={inputId}
+          onChange={() => handleSelectPlan(inputId)}
         />
         <img className="h-12 w-12" src={icon} alt="" />
         <div className="flex flex-col justify-center">
           <span className="text-primary-marine-blue font-bold">
             {inputName}
           </span>
-          <span className="text-neutral-cool-gray font-semibold text-[14px]">
+          <span className="text-neutral-cool-gray font-medium text-[14px]">
             {inputPriceMonthly}
           </span>
+          {freeMonths ? (
+            <span className="text-primary-marine-blue text-xs">
+              2 months free
+            </span>
+          ) : (
+            ""
+          )}
         </div>
+      </label>
+    );
+  };
+
+  const ServiceSelector = ({ name, description, price, inputName }) => {
+    const calculatedPrice =
+      formData.paymentPlan === "yearly" ? `${price}0` : price;
+    return (
+      <label
+        className={clsx(
+          "flex items-center justify-between border-neutral-light-gray border-1 px-4 py-3 rounded-lg cursor-pointer transition-all duration-200 hover:border-primary-purplish-blue md:py-4 md:px-6",
+          formData[inputName]
+            ? "border-primary-purplish-blue bg-neutral-magnolia"
+            : ""
+        )}
+      >
+        <div className="flex items-center justify-center gap-4">
+          <input
+            type="checkbox"
+            className="opacity-0 absolute pointer-events-none peer"
+            name={inputName}
+            id={inputName}
+            onChange={() => handleSelectAddOns(inputName)}
+          />
+          <div
+            className={clsx(
+              "w-6 h-6 border-1 border-neutral-light-gray rounded-sm transition-all duration-300 peer-checked:bg-primary-purplish-blue flex justify-center items-center",
+              formData[inputName] ? "bg-primary-purplish-blue" : ""
+            )}
+          >
+            <img className="w-4 h-4" src={checkMarkIcon} alt="" />
+          </div>
+          <div className="flex flex-col">
+            <p className="text-primary-marine-blue text-base font-bold">
+              {name}
+            </p>
+            <p className="text-neutral-cool-gray text-sm font-medium">
+              {description}
+            </p>
+          </div>
+        </div>
+        <p className="price text-primary-purplish-blue">{`+$${calculatedPrice}/mo`}</p>
       </label>
     );
   };
@@ -82,7 +162,7 @@ function App() {
           src={bgMobile}
         />
       </div>
-      <div className="z-9 relative h-full w-full overflow-hidde flex flex-col overflow-hidden justify-between items-center md:justify-center md:items-center md:pb-0 md:max-h-150">
+      <div className="z-9 relative h-full overflow-hidden w-full flex flex-col justify-between items-center md:justify-center md:items-center md:pb-0 md:max-h-150">
         <div className="w-full flex justify-center gap-4 py-12 md:hidden">
           {steps.map((step, index) => {
             return (
@@ -99,11 +179,8 @@ function App() {
             );
           })}
         </div>
-        <div className="p-4 h-full w-full flex justify-center max-w-220 md:h-full">
-          <form
-            action="#"
-            className="h-full w-full flex justify-center max-w-220 bg-neutral-alabaster p-4 rounded-lg gap-20 shadow-2xl"
-          >
+        <div className="h-full w-full flex justify-center max-w-220 md:h-full ">
+          <form action="#" className="form">
             <div className="w-110 max-h-full relative max-md:hidden">
               <img
                 src={bgDesktop}
@@ -118,10 +195,13 @@ function App() {
               >
                 {steps.map((step, index) => {
                   return (
-                    <div className="flex items-center justify-baseline gap-4">
+                    <div
+                      key={`desktop-${index}`}
+                      className="step-selector"
+                      onClick={() => handleSetStep(step.id)}
+                    >
                       <span
                         key={index}
-                        onClick={() => handleSetStep(step.id)}
                         className={clsx(
                           "steps",
                           step.id === activeStep ? "selected" : ""
@@ -142,11 +222,11 @@ function App() {
                 })}
               </div>
             </div>
-            <div className="content relative w-full flex flex-col">
+            <div className="content relative w-full flex flex-col px-2">
               <div className="w-full h-full relative">
                 <div
                   className={clsx(
-                    "form-section bg-neutral-white",
+                    "form-section",
                     activeStep === 1 ? "active" : "inactive"
                   )}
                 >
@@ -165,6 +245,7 @@ function App() {
                       name="name"
                       id="name"
                       placeholder="z.B. Stephen King"
+                      onChange={handleChange}
                     />
                   </div>
                   <div className="flex flex-col gap-1">
@@ -177,6 +258,7 @@ function App() {
                       name="email"
                       id="email"
                       placeholder="z.B. stephenking@lorem.com"
+                      onChange={handleChange}
                     />
                   </div>
                   <div className="flex flex-col gap-1">
@@ -189,12 +271,13 @@ function App() {
                       name="phone"
                       id="phone"
                       placeholder="z.B. +1 234 567 890"
+                      onChange={handleChange}
                     />
                   </div>
                 </div>
                 <div
                   className={clsx(
-                    "form-section bg-neutral-white",
+                    "form-section",
                     activeStep === 2 ? "active" : "inactive"
                   )}
                 >
@@ -204,30 +287,45 @@ function App() {
                   </p>
 
                   <div className="categories flex flex-col gap-4">
-                    <PlanSelector
-                      inputName="Arcade"
-                      inputId="arcade"
-                      inputPriceMonthly={switchState ? "$90/yr" : "$9/mo"}
-                      icon={arcadeIcon}
-                    />
-                    <PlanSelector
-                      inputName="Advanced"
-                      inputId="advanced"
-                      inputPriceMonthly={switchState ? "$120/yr" : "$12/mo"}
-                      icon={advanceIcon}
-                    />
-                    <PlanSelector
-                      inputName="Pro"
-                      inputId="pro"
-                      inputPriceMonthly={switchState ? "$150/yr" : "$15/mo"}
-                      icon={proIcon}
-                    />
+                    <div className="flex flex-col gap-4 md:flex-row">
+                      <PlanSelector
+                        inputName="Arcade"
+                        inputId="arcade"
+                        inputPriceMonthly={
+                          formData.paymentPlan === "yearly" ? "$90/yr" : "$9/mo"
+                        }
+                        freeMonths={formData.paymentPlan === "yearly"}
+                        icon={arcadeIcon}
+                      />
+                      <PlanSelector
+                        inputName="Advanced"
+                        inputId="advanced"
+                        inputPriceMonthly={
+                          formData.paymentPlan === "yearly"
+                            ? "$120/yr"
+                            : "$12/mo"
+                        }
+                        freeMonths={formData.paymentPlan === "yearly"}
+                        icon={advanceIcon}
+                      />
+                      <PlanSelector
+                        inputName="Pro"
+                        inputId="pro"
+                        inputPriceMonthly={
+                          formData.paymentPlan === "yearly"
+                            ? "$150/yr"
+                            : "$15/mo"
+                        }
+                        freeMonths={formData.paymentPlan === "yearly"}
+                        icon={proIcon}
+                      />
+                    </div>
 
                     <div className="flex p-2 w-full justify-center gap-6 bg-neutral-magnolia rounded-md ">
                       <p
                         className={clsx(
                           "font-medium transition-all duration-300",
-                          switchState
+                          formData.paymentPlan === "yearly"
                             ? "text-neutral-cool-gray"
                             : "text-primary-marine-blue"
                         )}
@@ -241,20 +339,19 @@ function App() {
                         className="absolute hidden peer"
                       />
                       <label
-                        // className=
                         className={clsx(
                           "w-14 bg-primary-marine-blue rounded-2xl relative after:w-4 after:h-4 after:bg-neutral-white after:rounded-full after:absolute after:left-1 after:top-1/2 after:-translate-y-1/2 after:transition-all after:duration-300 cursor-pointer",
-                          switchState
+                          formData.paymentPlan === "yearly"
                             ? "peer-checked:after:translate-x-[calc(100%+1rem)]"
                             : ""
                         )}
                         htmlFor="paryment-frequency"
-                        onClick={switchSchalten}
+                        onClick={handleSelectPaymentPlan}
                       ></label>
                       <p
                         className={clsx(
                           "font-medium transition-all duration-300",
-                          switchState
+                          formData.paymentPlan === "yearly"
                             ? "text-primary-marine-blue"
                             : "text-neutral-cool-gray"
                         )}
@@ -267,10 +364,35 @@ function App() {
 
                 <div
                   className={clsx(
-                    "form-section bg-emerald-800",
+                    "form-section",
                     activeStep === 3 ? "active" : "inactive"
                   )}
-                ></div>
+                >
+                  <p className="section-title">Pick add-ons</p>
+                  <p className="description">
+                    Add-ons help enhance your gaming experience.
+                  </p>
+                  <div className="flex flex-col gap-4">
+                    <ServiceSelector
+                      name="Online Service"
+                      description="Access to multiplayer games"
+                      price="1"
+                      inputName="online_service"
+                    ></ServiceSelector>
+                    <ServiceSelector
+                      name="Larger storage"
+                      description="Extra 1TB of cloud save"
+                      price="2"
+                      inputName="larger_storage"
+                    ></ServiceSelector>
+                    <ServiceSelector
+                      name="Customizable profile"
+                      description="Custom theme on your profile"
+                      price="2"
+                      inputName="customizable_profile"
+                    ></ServiceSelector>
+                  </div>
+                </div>
                 <div
                   className={clsx(
                     "form-section bg-indigo-900",
@@ -281,13 +403,13 @@ function App() {
               <div className="bg-neutral-white p-4 hidden justify-between md:flex">
                 <button
                   onClick={handlePreviusStep}
-                  className="text-neutral-cool-gray font-semibold hover:text-primary-marine-blue"
+                  className="text-neutral-cool-gray font-semibold transition-all duration-300 hover:text-primary-marine-blue cursor-pointer"
                 >
                   Go Back
                 </button>
                 <button
                   onClick={handleNextStep}
-                  className="bg-primary-marine-blue text-neutral-alabaster py-3 px-5 rounded-md ml-auto"
+                  className="bg-primary-marine-blue text-neutral-alabaster py-3 px-5 rounded-md ml-auto hover:brightness-110 cursor-pointer "
                   type="button"
                 >
                   Next Step
