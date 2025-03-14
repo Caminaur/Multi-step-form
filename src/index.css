@@ -36,6 +36,16 @@
   absolute px-6 py-8 md:py-2
   md:pt-10 md:pr-8 md:pb-0 md:pl-0;
 }
+
+.form-section-5 {
+  @apply w-full rounded-lg flex flex-col gap-4 bg-neutral-white
+  max-w-full overflow-hidden
+  transition ease-in duration-300 
+  translate-x-full opacity-0
+  absolute px-10 py-18 md:py-2
+  md:pt-0 md:pr-8 md:pb-0 md:pl-0
+  md:h-full md:justify-center;
+}
 /* 2.5rem 4rem 0 0rem; */
 
 .selected {
