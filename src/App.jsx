@@ -13,12 +13,53 @@ function App() {
     name: "",
     email: "",
     phone: "",
-    selectedPlan: "",
+    selectedPlan: "arcade",
     paymentPlan: "monthly",
-    online_service: false,
-    larger_storage: false,
-    customizable_profile: false,
+    plans: [
+      {
+        id: "arcade",
+        price: 9,
+        icon: arcadeIcon,
+        label: "Arcade",
+      },
+      {
+        id: "advance",
+        price: 12,
+        icon: advanceIcon,
+        label: "Advance",
+      },
+      {
+        id: "pro",
+        price: 15,
+        icon: proIcon,
+        label: "Pro",
+      },
+    ],
+    addons: [
+      {
+        id: "online_service",
+        label: "Online Service",
+        description: "Access to multiplayer games",
+        price: 1,
+        selected: false,
+      },
+      {
+        id: "larger_storage",
+        label: "Larger Storage",
+        description: "Extra 1TB of cloud save",
+        price: 2,
+        selected: false,
+      },
+      {
+        id: "customizable_profile",
+        label: "Customizable Profile",
+        description: "Custom theme on your profile",
+        price: 2,
+        selected: false,
+      },
+    ],
   });
+
   const steps = [
     {
       id: 1,
@@ -42,10 +83,35 @@ function App() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  function calculateTotal() {
+    const selectedPlan = formData.plans.filter(
+      (plan) => plan.id === formData.selectedPlan
+    )[0];
+    const price = selectedPlan.price;
+    const paymentPlan = formData.paymentPlan;
+    const selectedAddons = formData.addons.filter((addon) => addon.selected);
+    const frecuencyLabel = paymentPlan === "monthly" ? "mo" : "yr";
+
+    let total = 0;
+    if (paymentPlan === "monthly") {
+      for (const addon of selectedAddons) {
+        total += parseInt(addon.price);
+      }
+      total += price;
+    } else {
+      for (const addon of selectedAddons) {
+        total += parseInt(`${addon.price}0`);
+      }
+      total += parseInt(`${price}0`);
+    }
+    return `+$${total}/${frecuencyLabel}`;
+  }
+
   function handleNextStep() {
     setActiveStep((s) => s + 1);
   }
-  function handlePreviusStep() {
+  function handlePreviusStep(e) {
+    e.preventDefault();
     setActiveStep((s) => s - 1);
   }
 
@@ -54,8 +120,8 @@ function App() {
   }
 
   useEffect(() => {
-    console.log(formData);
-  }, [formData]);
+    // console.log(formData);
+  }, [activeStep]);
 
   function handleSelectPaymentPlan() {
     const newPlan = formData.paymentPlan === "monthly" ? "yearly" : "monthly";
@@ -66,13 +132,20 @@ function App() {
     setFormData({ ...formData, selectedPlan: id });
   }
   function handleSelectAddOns(id) {
-    setFormData({ ...formData, [id]: !formData[id] });
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      addons: prevFormData.addons.map((addon) => {
+        return addon.id === id
+          ? { ...addon, selected: !addon.selected }
+          : addon;
+      }),
+    }));
   }
 
   const PlanSelector = ({
     inputId,
     inputName,
-    inputPriceMonthly,
+    inputPrice,
     freeMonths,
     icon,
   }) => {
@@ -99,7 +172,7 @@ function App() {
             {inputName}
           </span>
           <span className="text-neutral-cool-gray font-medium text-[14px]">
-            {inputPriceMonthly}
+            {inputPrice}
           </span>
           {freeMonths ? (
             <span className="text-primary-marine-blue text-xs">
@@ -113,16 +186,22 @@ function App() {
     );
   };
 
-  const ServiceSelector = ({ name, description, price, inputName }) => {
+  const ServiceSelector = ({
+    name,
+    description,
+    price,
+    inputName,
+    selected,
+  }) => {
     const calculatedPrice =
       formData.paymentPlan === "yearly" ? `${price}0` : price;
+    console.log(calculatedPrice);
+
     return (
       <label
         className={clsx(
           "flex items-center justify-between border-neutral-light-gray border-1 px-4 py-3 rounded-lg cursor-pointer transition-all duration-200 hover:border-primary-purplish-blue md:py-4 md:px-6",
-          formData[inputName]
-            ? "border-primary-purplish-blue bg-neutral-magnolia"
-            : ""
+          selected ? "border-primary-purplish-blue bg-neutral-magnolia" : ""
         )}
       >
         <div className="flex items-center justify-center gap-4">
@@ -136,7 +215,7 @@ function App() {
           <div
             className={clsx(
               "w-6 h-6 border-1 border-neutral-light-gray rounded-sm transition-all duration-300 peer-checked:bg-primary-purplish-blue flex justify-center items-center",
-              formData[inputName] ? "bg-primary-purplish-blue" : ""
+              selected ? "bg-primary-purplish-blue" : ""
             )}
           >
             <img className="w-4 h-4" src={checkMarkIcon} alt="" />
@@ -152,6 +231,18 @@ function App() {
         </div>
         <p className="price text-primary-purplish-blue">{`+$${calculatedPrice}/mo`}</p>
       </label>
+    );
+  };
+  const AddOn = ({ name, price }) => {
+    const calculatedPrice =
+      formData.paymentPlan === "yearly" ? `+$${price}0/yr` : `+$${price}/mo`;
+    return (
+      <div className="flex justify-between">
+        <p className="description">{name}</p>
+        <p className="text-primary-marine-blue font-semibold">
+          {calculatedPrice}
+        </p>
+      </div>
     );
   };
   return (
@@ -288,37 +379,22 @@ function App() {
 
                   <div className="categories flex flex-col gap-4">
                     <div className="flex flex-col gap-4 md:flex-row">
-                      <PlanSelector
-                        inputName="Arcade"
-                        inputId="arcade"
-                        inputPriceMonthly={
-                          formData.paymentPlan === "yearly" ? "$90/yr" : "$9/mo"
-                        }
-                        freeMonths={formData.paymentPlan === "yearly"}
-                        icon={arcadeIcon}
-                      />
-                      <PlanSelector
-                        inputName="Advanced"
-                        inputId="advanced"
-                        inputPriceMonthly={
-                          formData.paymentPlan === "yearly"
-                            ? "$120/yr"
-                            : "$12/mo"
-                        }
-                        freeMonths={formData.paymentPlan === "yearly"}
-                        icon={advanceIcon}
-                      />
-                      <PlanSelector
-                        inputName="Pro"
-                        inputId="pro"
-                        inputPriceMonthly={
-                          formData.paymentPlan === "yearly"
-                            ? "$150/yr"
-                            : "$15/mo"
-                        }
-                        freeMonths={formData.paymentPlan === "yearly"}
-                        icon={proIcon}
-                      />
+                      {formData.plans.map((plan, index) => {
+                        return (
+                          <PlanSelector
+                            key={index}
+                            inputName={plan.label}
+                            inputId={plan.id}
+                            inputPrice={
+                              formData.paymentPlan === "yearly"
+                                ? `$${plan.price}0/yr`
+                                : `$${plan.price}/mo`
+                            }
+                            freeMonths={formData.paymentPlan === "yearly"}
+                            icon={plan.icon}
+                          />
+                        );
+                      })}
                     </div>
 
                     <div className="flex p-2 w-full justify-center gap-6 bg-neutral-magnolia rounded-md ">
@@ -373,24 +449,18 @@ function App() {
                     Add-ons help enhance your gaming experience.
                   </p>
                   <div className="flex flex-col gap-4">
-                    <ServiceSelector
-                      name="Online Service"
-                      description="Access to multiplayer games"
-                      price="1"
-                      inputName="online_service"
-                    ></ServiceSelector>
-                    <ServiceSelector
-                      name="Larger storage"
-                      description="Extra 1TB of cloud save"
-                      price="2"
-                      inputName="larger_storage"
-                    ></ServiceSelector>
-                    <ServiceSelector
-                      name="Customizable profile"
-                      description="Custom theme on your profile"
-                      price="2"
-                      inputName="customizable_profile"
-                    ></ServiceSelector>
+                    {formData.addons.map((addon, id) => {
+                      return (
+                        <ServiceSelector
+                          key={id}
+                          name={addon.label}
+                          description={addon.description}
+                          price={addon.price}
+                          inputName={addon.id}
+                          selected={addon.selected}
+                        ></ServiceSelector>
+                      );
+                    })}
                   </div>
                 </div>
                 <div
@@ -398,40 +468,115 @@ function App() {
                     "form-section bg-indigo-900",
                     activeStep === 4 ? "active" : "inactive"
                   )}
-                ></div>
+                >
+                  <p className="section-title">Finishing up</p>
+                  <p className="description">
+                    Double-check everything looks OK before confirming.
+                  </p>
+                  <div className="flex flex-col bg-neutral-magnolia p-4 rounded-lg">
+                    <div className="flex justify-between">
+                      <div className="flex flex-col">
+                        <p className="text-primary-marine-blue font-semibold capitalize">
+                          {formData.selectedPlan} ({formData.paymentPlan})
+                        </p>
+                        <p className="text-base text-neutral-cool-gray pr-8 md:pr-0 underline">
+                          Change
+                        </p>
+                      </div>
+                      <p className="text-primary-marine-blue font-semibold">
+                        {`$${
+                          formData.plans.filter(
+                            (plan) => plan.id === formData.selectedPlan
+                          )[0].price
+                        }${
+                          formData.paymentPlan === "monthly" ? "/mo" : "0/yr"
+                        }`}
+                      </p>
+                    </div>
+                    <div className="h-0.5 w-full bg-neutral-light-gray my-4"></div>
+                    {formData.addons.map((addon, index) => {
+                      return addon.selected ? (
+                        <AddOn
+                          key={index}
+                          name={addon.label}
+                          price={addon.price}
+                        ></AddOn>
+                      ) : (
+                        ""
+                      );
+                    })}
+                  </div>
+                  <div className="flex justify-between p-4">
+                    <p className="text-base text-neutral-cool-gray pr-8 md:pr-0">
+                      Total (per{" "}
+                      {formData.paymentPlan === "yearly" ? "year" : "month"})
+                    </p>
+                    <p className="text-primary-purplish-blue font-semibold text-lg">
+                      {calculateTotal()}
+                    </p>
+                  </div>
+                </div>
               </div>
               <div className="bg-neutral-white p-4 hidden justify-between md:flex">
-                <button
-                  onClick={handlePreviusStep}
-                  className="text-neutral-cool-gray font-semibold transition-all duration-300 hover:text-primary-marine-blue cursor-pointer"
-                >
-                  Go Back
-                </button>
-                <button
-                  onClick={handleNextStep}
-                  className="bg-primary-marine-blue text-neutral-alabaster py-3 px-5 rounded-md ml-auto hover:brightness-110 cursor-pointer "
-                  type="button"
-                >
-                  Next Step
-                </button>
+                {activeStep === 1 ? (
+                  ""
+                ) : (
+                  <button
+                    onClick={handlePreviusStep}
+                    className="text-neutral-cool-gray font-semibold transition-all duration-300 hover:text-primary-marine-blue cursor-pointer"
+                  >
+                    Go Back
+                  </button>
+                )}
+                {activeStep === 4 ? (
+                  <button
+                    onClick={handleNextStep}
+                    className="bg-primary-marine-blue text-neutral-alabaster py-3 px-5 rounded-md ml-auto hover:brightness-110 cursor-pointer "
+                    type="button"
+                  >
+                    Finish Form
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleNextStep}
+                    className="bg-primary-marine-blue text-neutral-alabaster py-3 px-5 rounded-md ml-auto hover:brightness-110 cursor-pointer "
+                    type="button"
+                  >
+                    Next Step
+                  </button>
+                )}
               </div>
             </div>
           </form>
         </div>
         <div className="bg-neutral-white p-4 flex justify-between w-full md:hidden">
-          <button
-            onClick={handlePreviusStep}
-            className="text-neutral-cool-gray font-semibold hover:text-primary-marine-blue"
-          >
-            Go Back
-          </button>
-          <button
-            onClick={handleNextStep}
-            className="bg-primary-marine-blue text-neutral-alabaster py-3 px-5 rounded-md ml-auto"
-            type="button"
-          >
-            Next Step
-          </button>
+          {activeStep === 1 ? (
+            ""
+          ) : (
+            <button
+              onClick={(e) => handlePreviusStep(e)}
+              className="text-neutral-cool-gray font-semibold hover:text-primary-marine-blue"
+            >
+              Go Back
+            </button>
+          )}
+          {activeStep === 4 ? (
+            <button
+              onClick={handleNextStep}
+              className="bg-primary-marine-blue text-neutral-alabaster py-3 px-5 rounded-md ml-auto"
+              type="button"
+            >
+              Finish Form
+            </button>
+          ) : (
+            <button
+              onClick={handleNextStep}
+              className="bg-primary-marine-blue text-neutral-alabaster py-3 px-5 rounded-md ml-auto"
+              type="button"
+            >
+              Next Step
+            </button>
+          )}
         </div>
       </div>
     </div>
