@@ -336,6 +336,22 @@ function App() {
           </div>
         )}
       </div>
+      <div class="text-[11px] absolute bottom-0 text-center w-full  z-10 text-neutral-slate-900 max-sm:text-xs sm:text-neutral-slate-700 max-sm:text-neutral-slate-500 md:bottom-3">
+        <a
+          className="text-blue-600 font-bold max-sm:text-primary-lime"
+          href="https://www.frontendmentor.io/challenges/multistep-form-YVAnSdqQBJ"
+        >
+          Challenge
+        </a>{" "}
+        coded by{" "}
+        <a
+          href="https://github.com/Caminaur/Multi-step-form"
+          className="text-blue-600 font-bold max-sm:text-primary-lime"
+        >
+          Julian Caminaur
+        </a>
+        .
+      </div>
     </div>
   );
 }
