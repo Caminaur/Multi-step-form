@@ -2,7 +2,7 @@ import clsx from "clsx";
 import React from "react";
 
 function Section4(props) {
-  const { activeStep, formData, calculateTotal } = props;
+  const { activeStep, formData, calculateTotal, handleSetStep } = props;
 
   const AddOn = ({ name, price }) => {
     const calculatedPrice =
@@ -33,7 +33,10 @@ function Section4(props) {
             <p className="text-primary-marine-blue font-semibold capitalize">
               {formData.selectedPlan} ({formData.paymentPlan})
             </p>
-            <p className="text-base text-neutral-cool-gray pr-8 md:pr-0 underline">
+            <p
+              onClick={() => handleSetStep(2)}
+              className="text-base text-neutral-cool-gray pr-8 md:pr-0 underline cursor-pointer hover:text-primary-purplish-blue"
+            >
               Change
             </p>
           </div>

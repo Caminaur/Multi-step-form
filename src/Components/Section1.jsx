@@ -2,7 +2,7 @@ import clsx from "clsx";
 import React from "react";
 
 function Section1(props) {
-  const { handleChange, activeStep } = props;
+  const { handleChange, activeStep, errors } = props;
 
   return (
     <div
@@ -14,11 +14,14 @@ function Section1(props) {
       </p>
 
       <div className="flex flex-col gap-1 w-full">
-        <label className="label" htmlFor="name">
-          Name
-        </label>
+        <div className="flex justify-between items-center">
+          <label className="label" htmlFor="name">
+            Name
+          </label>
+          {errors.name ? <p className="errorMessage">{errors.name}</p> : ""}
+        </div>
         <input
-          className="input"
+          className={clsx("", errors.name ? "inputError" : "input")}
           type="text"
           name="name"
           id="name"
@@ -27,11 +30,14 @@ function Section1(props) {
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label className="label" htmlFor="email">
-          Email Address
-        </label>
+        <div className="flex justify-between items-center">
+          <label className="label" htmlFor="email">
+            Email Address
+          </label>
+          {errors.email ? <p className="errorMessage">{errors.email}</p> : ""}
+        </div>
         <input
-          className="input"
+          className={clsx("", errors.email ? "inputError" : "input")}
           type="text"
           name="email"
           id="email"
@@ -40,11 +46,15 @@ function Section1(props) {
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label className="label" htmlFor="phone">
-          Phone Number
-        </label>
+        <div className="flex justify-between items-center">
+          <label className="label" htmlFor="phone">
+            Phone Number
+          </label>
+          {errors.phone ? <p className="errorMessage">{errors.phone}</p> : ""}
+        </div>
+
         <input
-          className="input"
+          className={clsx("", errors.phone ? "inputError" : "input")}
           type="number"
           name="phone"
           id="phone"

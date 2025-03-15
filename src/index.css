@@ -79,6 +79,17 @@
   hover:border-primary-purplish-blue;
 }
 
+.errorMessage {
+  @apply text-primary-strawberry-red font-semibold text-sm text-right;
+}
+
+.inputError {
+  @apply py-2 px-4 border-2 border-primary-strawberry-red rounded-md outline-0
+  font-bold text-primary-marine-blue
+  placeholder:font-bold placeholder:text-neutral-cool-gray
+  focus:border-primary-purplish-blue;
+}
+
 /* step-2 */
 .category-selector {
   @apply flex gap-4 align-middle p-4 rounded-lg border-2 border-neutral-300 items-center

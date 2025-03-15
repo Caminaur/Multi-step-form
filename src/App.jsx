@@ -13,6 +13,7 @@ import Section5 from "./Components/Section5";
 
 function App() {
   const [activeStep, setActiveStep] = useState(1);
+  const [formErrors, setFormErrors] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -63,6 +64,9 @@ function App() {
       },
     ],
   });
+  useEffect(() => {
+    console.log(formErrors);
+  }, [formErrors]);
 
   const steps = [
     {
@@ -86,6 +90,39 @@ function App() {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  function handleNextStep() {
+    if (!validateCurrentStep()) return;
+    setActiveStep((s) => s + 1);
+  }
+  function handlePreviusStep(e) {
+    e.preventDefault();
+    setActiveStep((s) => s - 1);
+  }
+
+  function handleSetStep(step) {
+    if (activeStep > 4) return;
+    setActiveStep(step);
+  }
+
+  function handleSelectPaymentPlan() {
+    const newPlan = formData.paymentPlan === "monthly" ? "yearly" : "monthly";
+    setFormData({ ...formData, paymentPlan: newPlan });
+  }
+
+  function handleSelectPlan(id) {
+    setFormData({ ...formData, selectedPlan: id });
+  }
+  function handleSelectAddOns(id) {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      addons: prevFormData.addons.map((addon) => {
+        return addon.id === id
+          ? { ...addon, selected: !addon.selected }
+          : addon;
+      }),
+    }));
+  }
 
   function calculateTotal() {
     const selectedPlan = formData.plans.filter(
@@ -111,40 +148,19 @@ function App() {
     return `+$${total}/${frecuencyLabel}`;
   }
 
-  function handleNextStep() {
-    setActiveStep((s) => s + 1);
-  }
-  function handlePreviusStep(e) {
-    e.preventDefault();
-    setActiveStep((s) => s - 1);
-  }
+  function validateCurrentStep() {
+    const errors = {};
 
-  function handleSetStep(step) {
-    if (activeStep > 4) return;
-    setActiveStep(step);
-  }
+    if (activeStep === 1) {
+      if (!formData.name.trim()) errors.name = "Name is required";
+      if (!formData.email.trim()) errors.email = "Email is required";
+      else if (!/^\S+@\S+\.\S+$/.test(formData.email))
+        errors.email = "Invalid email format";
+      if (!formData.phone.trim()) errors.phone = "Phone number is required";
+    }
 
-  useEffect(() => {
-    // console.log(formData);
-  }, [activeStep]);
-
-  function handleSelectPaymentPlan() {
-    const newPlan = formData.paymentPlan === "monthly" ? "yearly" : "monthly";
-    setFormData({ ...formData, paymentPlan: newPlan });
-  }
-
-  function handleSelectPlan(id) {
-    setFormData({ ...formData, selectedPlan: id });
-  }
-  function handleSelectAddOns(id) {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      addons: prevFormData.addons.map((addon) => {
-        return addon.id === id
-          ? { ...addon, selected: !addon.selected }
-          : addon;
-      }),
-    }));
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   }
 
   return (
@@ -222,7 +238,11 @@ function App() {
             </div>
             <div className="content relative w-full flex flex-col px-2">
               <div className="w-full h-full relative">
-                <Section1 handleChange={handleChange} activeStep={activeStep} />
+                <Section1
+                  handleChange={handleChange}
+                  activeStep={activeStep}
+                  errors={formErrors}
+                />
                 <Section2
                   activeStep={activeStep}
                   formData={formData}
@@ -239,6 +259,7 @@ function App() {
                   activeStep={activeStep}
                   formData={formData}
                   calculateTotal={calculateTotal}
+                  handleSetStep={handleSetStep}
                 />
                 <Section5 activeStep={activeStep} formData={formData} />
               </div>
