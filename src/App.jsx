@@ -101,6 +101,7 @@ function App() {
   }
 
   function handleSetStep(step) {
+    if (!validateCurrentStep()) return;
     if (activeStep > 4) return;
     setActiveStep(step);
   }
@@ -171,7 +172,7 @@ function App() {
           src={bgMobile}
         />
       </div>
-      <div className="z-9 relative h-full overflow-hidden w-full flex flex-col justify-between items-center md:justify-center md:items-center md:pb-0 md:max-h-150">
+      <div className="z-9 relative h-full overflow-hidden w-full flex flex-col justify-between items-center md:justify-center md:items-center md:pb-0">
         <div className="w-full flex justify-center gap-4 py-12 md:hidden">
           {steps.map((step, index) => {
             return (
@@ -190,7 +191,7 @@ function App() {
             );
           })}
         </div>
-        <div className="h-full w-full flex justify-center max-w-220 md:h-full ">
+        <div className="h-full w-full flex justify-center max-w-220 md:h-150 md:shadow-lg">
           <form action="#" className="form">
             <div className="w-110 max-h-full relative max-md:hidden">
               <img
